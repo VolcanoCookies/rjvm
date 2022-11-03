@@ -1,34 +1,35 @@
-use crate::info::pool::constant_info::ConstantInfo;
-use std::ops::Index;
+use std::any::{Any, TypeId};
+
+use crate::r#type::dyn_vec::DynVec;
 
 pub struct ConstantPool {
-    pool: Vec<ConstantInfo>,
+    pool: DynVec,
     count: usize,
 }
 
 impl ConstantPool {
     pub fn new(constant_pool_count: usize) -> Self {
-        let pool = Vec::<ConstantInfo>::with_capacity(constant_pool_count - 1);
-
         Self {
-            pool,
+            pool: DynVec::with_capacity(constant_pool_count - 1),
             count: constant_pool_count,
         }
     }
 
-    pub fn push(&mut self, c: ConstantInfo) {
-        self.pool.push(c);
+    pub fn get<T>(&self, i: usize) -> &T
+    where
+        T: Any,
+    {
+        self.pool.get::<T>(i)
     }
-}
 
-impl Index<usize> for ConstantPool {
-    type Output = ConstantInfo;
+    pub fn push<T>(&mut self, e: T)
+    where
+        T: Any,
+    {
+        self.pool.push(e);
+    }
 
-    fn index(&self, index: usize) -> &Self::Output {
-        if index == 0 {
-            panic!("Do not the zero index.");
-        }
-
-        &self.pool[index - 1]
+    pub fn push_box(&mut self, e: Box<dyn Any>) {
+        self.pool.push_box(e);
     }
 }

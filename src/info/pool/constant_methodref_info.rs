@@ -12,8 +12,8 @@ u2 name_and_type_index;
 */
 
 pub struct ConstantMethodrefInfo {
-    class_index: usize,
-    name_and_type_index: usize,
+    pub class_index: usize,
+    pub name_and_type_index: usize,
 }
 
 impl ConstantInfoTrait for ConstantMethodrefInfo {

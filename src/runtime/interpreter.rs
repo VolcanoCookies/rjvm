@@ -5,6 +5,9 @@ use crate::info::attributes::attribute_info::AttributeInfo;
 use crate::info::attributes::code_attribute::CodeAttribute;
 use crate::info::class_file::ClassFile;
 use crate::info::method_info::MethodInfo;
+use crate::info::pool::constant_class_info::ConstantClassInfo;
+use crate::info::pool::constant_info::ConstantInfo;
+use crate::info::pool::constant_methodref_info::ConstantMethodrefInfo;
 use crate::r#type::reference_type::ReferenceType;
 use crate::r#type::reference_type::ReferenceType::Class;
 use crate::r#type::type_value::TypeValue;
@@ -63,6 +66,12 @@ impl Interpreter {
                 }
                 OpCode::invokespecial => {
                     let index = code_attribute.code.get_2(pc);
+                    let method_ref = class_file
+                        .constant_pool
+                        .get::<ConstantMethodrefInfo>(index as usize);
+                    let class_ref = class_file
+                        .constant_pool
+                        .get::<ConstantClassInfo>(method_ref.class_index);
 
                     pc += 2;
                 }

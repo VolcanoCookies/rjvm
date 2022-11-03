@@ -1,3 +1,4 @@
+#![feature(type_name_of_val)]
 extern crate core;
 
 use std::fs;
@@ -11,6 +12,7 @@ pub mod runtime;
 pub mod r#type;
 pub mod util;
 
+#[feature(type_name_of_val)]
 #[allow(unused_variables)]
 fn main() {
     let class_file_path = "./src/Main.class";
@@ -25,5 +27,5 @@ fn main() {
         heap: Vec::new(),
     };
 
-    thread.run_init(&class_file);
+    thread.run(&class_file);
 }
