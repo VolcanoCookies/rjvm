@@ -11,7 +11,7 @@ use crate::util::read_buffer::ReadBuffer;
 use super::constant_info_tag::ConstantInfoTag;
 
 pub struct ConstantClassInfo {
-    name_index: usize,
+    pub name_index: usize,
 }
 
 impl ConstantInfoTrait for ConstantClassInfo {

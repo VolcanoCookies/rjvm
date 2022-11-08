@@ -9,7 +9,13 @@ use crate::info::attributes::constant_value_attribute::ConstantValueAttribute;
 use crate::info::attributes::line_number_table_attribute::LineNumberTableAttribute;
 use crate::info::attributes::source_file_attribute::SourceFileAttribute;
 use crate::info::constant_pool::ConstantPool;
+use crate::info::pool::constant_class_info::ConstantClassInfo;
+use crate::info::pool::constant_fieldref_info::ConstantFieldrefInfo;
 use crate::info::pool::constant_info::ConstantInfo;
+use crate::info::pool::constant_methodref_info::ConstantMethodrefInfo;
+use crate::info::pool::constant_name_and_type::ConstantNameAndTypeInfo;
+use crate::info::pool::constant_string_info::ConstantStringInfo;
+use crate::info::pool::constant_utf8_info::ConstantUtf8Info;
 use crate::util::read_buffer::ReadBuffer;
 
 pub enum AttributeInfo {
@@ -24,8 +30,7 @@ impl AttributeInfo {
         let attribute_name_index = r.read_u2() as usize;
         let attribute_length = r.read_u4() as usize;
 
-        let constant_info = &constant_pool[attribute_name_index];
-        let utf8_info = cast!(constant_info, ConstantInfo::Utf8);
+        let utf8_info = constant_pool.get::<ConstantUtf8Info>(attribute_name_index);
         let name = from_utf8(&*utf8_info.bytes).unwrap();
 
         match name {

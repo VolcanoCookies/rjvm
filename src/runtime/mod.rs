@@ -1,3 +1,4 @@
+pub mod class_loader;
 pub mod executor;
 pub mod heap;
 pub mod instruction;

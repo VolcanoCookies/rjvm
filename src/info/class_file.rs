@@ -26,7 +26,7 @@ pub struct ClassFile {
 }
 
 impl ClassFile {
-    pub fn new(r: &mut ReadBuffer) -> Self {
+    pub fn parse(r: &mut ReadBuffer) -> Self {
         let magic = r.read_u4();
         let major_version = r.read_u2();
         let minor_version = r.read_u2();
@@ -40,7 +40,7 @@ impl ClassFile {
         let mut constant_pool = ConstantPool::new(constant_pool_count);
         for _ in 0..constant_pool_count {
             let cpi = ConstantInfo::parse(r);
-            constant_pool.push(cpi);
+            constant_pool.push_box(cpi);
         }
         let access_flags = r.read_u2();
         let this_class = r.read_u2() as usize;

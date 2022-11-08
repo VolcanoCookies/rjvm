@@ -9,16 +9,19 @@ attribute_info attributes[attributes_count];
 */
 
 use crate::info::attributes::attribute_info::AttributeInfo;
+use crate::info::attributes::code_attribute::CodeAttribute;
 use crate::util::read_buffer::ReadBuffer;
 
 use super::constant_pool::ConstantPool;
 
+#[derive(Clone)]
 pub struct MethodInfo {
     pub access_flags: u16,
     pub name_index: usize,
     pub descriptor_index: usize,
     pub attributes_count: usize,
     pub attribute_info: Vec<AttributeInfo>,
+    pub code: CodeAttribute,
 }
 
 impl MethodInfo {
@@ -27,10 +30,17 @@ impl MethodInfo {
         let name_index = r.read_u2() as usize;
         let descriptor_index = r.read_u2() as usize;
         let attributes_count = r.read_u2() as usize;
+
+        let mut opt_code_attribute: Option<CodeAttribute> = None;
+
         let mut attribute_info = Vec::<AttributeInfo>::with_capacity(attributes_count);
         for _ in 0..attributes_count {
             let atr = AttributeInfo::parse(r, constant_pool);
-            attribute_info.push(atr);
+
+            match atr {
+                AttributeInfo::Code(code_attribute) => opt_code_attribute = Some(code_attribute),
+                _ => attribute_info.push(atr),
+            }
         }
 
         Self {
@@ -39,6 +49,7 @@ impl MethodInfo {
             descriptor_index,
             attributes_count,
             attribute_info,
+            code: opt_code_attribute.unwrap(),
         }
     }
 }

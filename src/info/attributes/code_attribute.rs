@@ -30,6 +30,7 @@ pub struct ExceptionTableEntry {
     pub catch_type: usize,
 }
 
+#[derive(Clone)]
 pub struct CodeAttribute {
     pub attribute_name_index: usize,
     pub attribute_length: usize,

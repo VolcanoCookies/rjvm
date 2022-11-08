@@ -10,6 +10,7 @@ use crate::r#type::reference_type::ReferenceType::Class;
 use crate::r#type::type_value::TypeValue;
 use crate::runtime::op_stack::OpStack;
 use crate::runtime::stack_frame::StackFrame;
+use crate::runtime::thread::Thread;
 
 pub struct Interpreter {}
 
@@ -35,18 +36,24 @@ impl Interpreter {
         panic!("method has no code attribute");
     }
 
-    pub fn invoke_method(method_info: &MethodInfo, class_file: &ClassFile) {
-        let code_attribute = Interpreter::get_code_attribute(method_info);
-        let mut pc: usize = 0;
+    pub fn invoke_method(thread: &mut Thread, method_info: &MethodInfo, class_file: &ClassFile) {
+        let pc = &mut thread.program_counter;
+        let mut stack = &thread.stack;
+        let mut heap = &mut thread.heap;
 
-        let mut local_variables = Vec::<Rc<TypeValue>>::new();
+        let mut frame = stack.last().unwrap();
+        let mut local_variables = &frame.local_variables;
+        let mut op_stack = &frame.op_stack;
+
+        let code_attribute = &method_info.code;
+
         local_variables.push(Rc::new(TypeValue::Reference(Class(class_file.this_class))));
 
         let mut op_stack = OpStack::new();
 
-        while pc < code_attribute.code_length {
-            let op = code_attribute.code.get(pc);
-            pc += 1;
+        while *pc < code_attribute.code_length {
+            let op = code_attribute.code.get(*pc);
+            *pc += 1;
 
             match op {
                 OpCode::aload_0 => {
@@ -62,9 +69,9 @@ impl Interpreter {
                     Self::a_load(3, &local_variables, &mut op_stack);
                 }
                 OpCode::invokespecial => {
-                    let index = code_attribute.code.get_2(pc);
+                    let index = code_attribute.code.get_2(*pc);
 
-                    pc += 2;
+                    *pc += 2;
                 }
                 OpCode::return_ => {
                     // Check that the return type of the method is void

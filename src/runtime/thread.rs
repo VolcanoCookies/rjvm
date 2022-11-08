@@ -1,18 +1,9 @@
-use std::any::Any;
-use std::rc::Rc;
-
-use crate::info::attributes::attribute_info::AttributeInfo;
-use crate::info::attributes::code_attribute::CodeAttribute;
 use crate::info::class_file::ClassFile;
 use crate::info::method_info::MethodInfo;
-use crate::info::pool::constant_info::ConstantInfo;
-use crate::info::pool::constant_info::ConstantInfo::Utf8;
-use crate::r#type::reference_type::ReferenceType::{Class, Null};
-use crate::r#type::type_value::TypeValue;
-use crate::r#type::type_value::TypeValue::Reference;
+use crate::info::pool::constant_utf8_info::ConstantUtf8Info;
 use crate::runtime::interpreter::Interpreter;
 use crate::runtime::stack_frame::StackFrame;
-use crate::{cast, main};
+use std::any::Any;
 
 pub struct Thread {
     pub program_counter: usize,
@@ -31,22 +22,20 @@ impl Thread {
 
     fn get_init_method(class_file: &ClassFile) -> Option<&MethodInfo> {
         for method_info in &class_file.method_info {
-            match &class_file.constant_pool[method_info.name_index] {
-                Utf8(utf8_info) => {
-                    if utf8_info.str() == "<init>" {
-                        return Some(method_info);
-                    }
-                }
-                _ => {
-                    panic!("Method name is not a utf8 constant");
-                }
+            let utf8_info: &ConstantUtf8Info = class_file.constant_pool.get(method_info.name_index);
+            if utf8_info.str() == "<init>" {
+                return Some(method_info);
             }
         }
         return None;
     }
 
     pub fn run(&mut self, main_class_file: &ClassFile) {
-        let main_method = Thread::get_init_method(main_class_file)?;
-        Interpreter::invoke_method(main_method, main_class_file);
+        let opt_main_method = Thread::get_init_method(main_class_file);
+        if opt_main_method.is_none() {
+            panic!("Main class does not have a <init> method");
+        }
+        let main_method = opt_main_method.unwrap();
+        Interpreter::invoke_method(&mut self, main_method, main_class_file);
     }
 }
